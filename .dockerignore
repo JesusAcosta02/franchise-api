@@ -1,6 +1,5 @@
 target/
-.git
 *.iml
 *.log
-*.class
-.idea/
+*.md
+.git

@@ -4,8 +4,8 @@ spring:
 
   data:
     mongodb:
-      uri: ${MONGO_URI:mongodb://localhost:27017/franchise-db}
+      uri: ${MONGO_URI:mongodb+srv://franchise_user:Vz8cpEYLAP2dX6L5@cluster0.larqj8l.mongodb.net/franchise-db?retryWrites=true&w=majority&appName=Cluster0}
       auto-index-creation: true
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT:8081}

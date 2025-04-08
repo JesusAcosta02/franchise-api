@@ -7,5 +7,5 @@ RUN ./mvnw clean package -DskipTests
 # Etapa de ejecución
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=build /app/target/franchise-api-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=build /app/target/*SNAPSHOT.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
