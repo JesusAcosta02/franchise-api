@@ -41,7 +41,7 @@ class DeleteProductFromBranchUseCaseTest {
 
         // Act & Assert
         StepVerifier.create(useCase.execute(franchiseId, branchId, productId))
-                .expectNextMatches(result -> result.getBranches().get(0).getProducts().isEmpty())
+                .expectNextMatches(result -> result.getBranches().getFirst().getProducts().isEmpty())
                 .verifyComplete();
 
         verify(repository).findById(franchiseId);

@@ -37,7 +37,7 @@ class UpdateBranchNameUseCaseTest {
 
         // Act & Assert
         StepVerifier.create(useCase.execute(branchId, newName))
-                .expectNextMatches(result -> result.getBranches().get(0).getName().equals(newName))
+                .expectNextMatches(result -> result.getBranches().getFirst().getName().equals(newName))
                 .verifyComplete();
 
         verify(repository).findByBranchId(branchId);

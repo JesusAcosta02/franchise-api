@@ -1,7 +1,5 @@
 package com.franchise_api.application.usecase.products;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.franchise_api.domain.model.Branch;
 import com.franchise_api.domain.model.Franchise;
 import com.franchise_api.domain.model.Product;
@@ -42,7 +40,7 @@ class UpdateProductNameUseCaseTest {
         // Act & Assert
         StepVerifier.create(useCase.execute(productId, newName))
                 .expectNextMatches(result ->
-                        result.getBranches().get(0).getProducts().get(0).getName().equals(newName)
+                        result.getBranches().getFirst().getProducts().getFirst().getName().equals(newName)
                 )
                 .verifyComplete();
 

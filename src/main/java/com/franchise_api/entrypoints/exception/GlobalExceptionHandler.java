@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public Mono<ServerResponse> handleGenericException(Exception ex, ServerWebExchange exchange) {
+    public Mono<ServerResponse> handleGenericException(ServerWebExchange exchange) {
         return buildErrorResponse(exchange, "Unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

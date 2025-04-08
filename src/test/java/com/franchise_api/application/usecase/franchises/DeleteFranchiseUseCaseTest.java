@@ -1,7 +1,5 @@
 package com.franchise_api.application.usecase.franchises;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.franchise_api.domain.repository.FranchiseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
