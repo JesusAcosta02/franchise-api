@@ -1,21 +1,15 @@
 package com.franchise_api.entrypoints.rest;
 
 import com.franchise_api.application.usecase.branch.AddBranchToFranchiseUseCase;
-import com.franchise_api.application.usecase.products.DeleteProductFromBranchUseCase;
 import com.franchise_api.application.usecase.branch.UpdateBranchNameUseCase;
+import com.franchise_api.application.usecase.franchises.*;
+import com.franchise_api.application.usecase.products.DeleteProductFromBranchUseCase;
 import com.franchise_api.application.usecase.products.GetProductWithMostStockUseCase;
 import com.franchise_api.application.usecase.products.UpdateProductNameUseCase;
-import com.franchise_api.application.usecase.franchises.DeleteFranchiseUseCase;
-import com.franchise_api.application.usecase.franchises.GetFranchiseByIdUseCase;
-import com.franchise_api.application.usecase.franchises.ListFranchisesUseCase;
-import com.franchise_api.application.usecase.franchises.SaveFranchiseUseCase;
 import com.franchise_api.application.usecase.products.UpdateProductStockUseCase;
 import com.franchise_api.application.util.FranchiseInputSanitizer;
 import com.franchise_api.domain.model.Franchise;
-import com.franchise_api.entrypoints.dto.BranchDTO;
-import com.franchise_api.entrypoints.dto.FranchiseDTO;
-import com.franchise_api.entrypoints.dto.ProductDTO;
-import com.franchise_api.entrypoints.dto.UpdateStockRequest;
+import com.franchise_api.entrypoints.dto.*;
 import com.franchise_api.entrypoints.dto.mappers.BranchDtoMapper;
 import com.franchise_api.entrypoints.dto.mappers.FranchiseDtoMapper;
 import com.franchise_api.entrypoints.dto.mappers.ProductDtoMapper;
@@ -39,6 +33,7 @@ public class FranchiseController {
     private final DeleteProductFromBranchUseCase deleteProductFromBranchUseCase;
     private final UpdateProductStockUseCase updateProductStockUseCase;
     private final GetProductWithMostStockUseCase getProductWithMostStockUseCase;
+    private final UpdateFranchiseNameUseCase updateFranchiseNameUseCase;
     private final ProductDtoMapper productDtoMapper;
     private final FranchiseDtoMapper franchiseDtoMapper;
     private final BranchDtoMapper branchDtoMapper;
@@ -112,6 +107,14 @@ public class FranchiseController {
         return getProductWithMostStockUseCase
                 .execute(branchId)
                 .map(productDtoMapper::toDto);
+    }
+
+    @PatchMapping("/{franchiseId}/name")
+    public Mono<FranchiseDTO> updateFranchiseName(@PathVariable String franchiseId,
+                                                  @RequestBody UpdateNameRequest request) {
+        return updateFranchiseNameUseCase
+                .execute(franchiseId, request.getName())
+                .map(franchiseDtoMapper::toDto);
     }
 
 

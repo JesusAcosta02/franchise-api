@@ -1,6 +1,11 @@
 package com.franchise_api.application.usecase.products;
 
+import com.franchise_api.domain.exception.BranchNotFoundException;
+import com.franchise_api.domain.exception.FranchiseNotFoundException;
+import com.franchise_api.domain.exception.ProductNotFoundException;
+import com.franchise_api.domain.model.Branch;
 import com.franchise_api.domain.model.Franchise;
+import com.franchise_api.domain.model.Product;
 import com.franchise_api.domain.repository.FranchiseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,16 +19,19 @@ public class UpdateProductStockUseCase {
 
     public Mono<Franchise> execute(String franchiseId, String branchId, String productId, Integer newStock) {
         return repository.findById(franchiseId)
+                .switchIfEmpty(Mono.error(new FranchiseNotFoundException(franchiseId)))
                 .map(franchise -> {
-                    franchise.getBranches().forEach(branch -> {
-                        if (branch.getId().equals(branchId)) {
-                            branch.getProducts().forEach(product -> {
-                                if (product.getId().equals(productId)) {
-                                    product.setStock(newStock);
-                                }
-                            });
-                        }
-                    });
+                    Branch branch = franchise.getBranches().stream()
+                            .filter(b -> b.getId().equals(branchId))
+                            .findFirst()
+                            .orElseThrow(() -> new BranchNotFoundException(branchId));
+
+                    Product product = branch.getProducts().stream()
+                            .filter(p -> p.getId().equals(productId))
+                            .findFirst()
+                            .orElseThrow(() -> new ProductNotFoundException(productId));
+
+                    product.setStock(newStock);
                     return franchise;
                 })
                 .flatMap(repository::save);
