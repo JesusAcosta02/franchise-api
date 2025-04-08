@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Infrastructure for franchise-api using ECS Fargate, Load Balancer and API Gateway
+
+Parameters:
+  VpcId:
+    Type: String
+    Default: vpc-04d1c0e284921a48d
+
+  Subnet1:
+    Type: String
+    Default: subnet-0bcbc241eebf14312
+
+  Subnet2:
+    Type: String
+    Default: subnet-0c68f5bb0878bcd56
+
+  MongoUri:
+    Type: String
+    Description: MongoDB Atlas connection URI
+
+  ImageUrl:
+    Type: String
+    Description: Docker image URL in ECR
+
+Resources:
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  FranchiseTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      RequiresCompatibilities: [FARGATE]
+      Cpu: 256
+      Memory: 512
+      NetworkMode: awsvpc
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: franchise-api
+          Image: !Ref ImageUrl
+          PortMappings:
+            - ContainerPort: 8080
+          Environment:
+            - Name: MONGO_URI
+              Value: !Ref MongoUri
+
+  FranchiseServiceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP traffic
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+
+  FranchiseCluster:
+    Type: AWS::ECS::Cluster
+
+  FranchiseService:
+    Type: AWS::ECS::Service
+    DependsOn: LoadBalancerListener
+    Properties:
+      Cluster: !Ref FranchiseCluster
+      LaunchType: FARGATE
+      DesiredCount: 1
+      TaskDefinition: !Ref FranchiseTaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref Subnet1
+            - !Ref Subnet2
+          SecurityGroups:
+            - !Ref FranchiseServiceSecurityGroup
+          AssignPublicIp: ENABLED
+      LoadBalancers:
+        - ContainerName: franchise-api
+          ContainerPort: 8080
+          TargetGroupArn: !Ref FranchiseTargetGroup
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Subnets:
+        - !Ref Subnet1
+        - !Ref Subnet2
+      SecurityGroups:
+        - !Ref FranchiseServiceSecurityGroup
+      Scheme: internet-facing
+      Type: application
+
+  FranchiseTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Port: 8080
+      Protocol: HTTP
+      VpcId: !Ref VpcId
+      TargetType: ip
+      HealthCheckPath: /actuator/health
+
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref FranchiseTargetGroup
