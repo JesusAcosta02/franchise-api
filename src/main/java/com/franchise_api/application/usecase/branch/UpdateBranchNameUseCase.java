@@ -1,5 +1,7 @@
 package com.franchise_api.application.usecase.branch;
 
+import com.franchise_api.domain.exception.BranchNotFoundException;
+import com.franchise_api.domain.model.Branch;
 import com.franchise_api.domain.model.Franchise;
 import com.franchise_api.domain.repository.FranchiseRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +16,15 @@ public class UpdateBranchNameUseCase {
 
     public Mono<Franchise> execute(String branchId, String newName) {
         return repository.findByBranchId(branchId)
+                .switchIfEmpty(Mono.error(new BranchNotFoundException(branchId)))
                 .map(franchise -> {
-                    franchise.getBranches().forEach(branch -> {
+                    for (Branch branch : franchise.getBranches()) {
                         if (branch.getId().equals(branchId)) {
                             branch.setName(newName);
+                            return franchise;
                         }
-                    });
-                    return franchise;
+                    }
+                    throw new BranchNotFoundException(branchId); // fallback
                 })
                 .flatMap(repository::save);
     }
