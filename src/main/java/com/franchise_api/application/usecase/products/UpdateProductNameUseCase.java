@@ -1,4 +1,4 @@
-package com.franchise_api.application.usecase;
+package com.franchise_api.application.usecase.products;
 
 import com.franchise_api.domain.model.Franchise;
 import com.franchise_api.domain.repository.FranchiseRepository;

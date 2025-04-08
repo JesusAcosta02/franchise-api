@@ -1,4 +1,4 @@
-package com.franchise_api.application.usecase;
+package com.franchise_api.application.usecase.products;
 
 import com.franchise_api.domain.model.Franchise;
 import com.franchise_api.domain.repository.FranchiseRepository;
@@ -8,16 +8,20 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class UpdateBranchNameUseCase {
+public class UpdateProductStockUseCase {
 
     private final FranchiseRepository repository;
 
-    public Mono<Franchise> execute(String branchId, String newName) {
-        return repository.findByBranchId(branchId)
+    public Mono<Franchise> execute(String franchiseId, String branchId, String productId, Integer newStock) {
+        return repository.findById(franchiseId)
                 .map(franchise -> {
                     franchise.getBranches().forEach(branch -> {
                         if (branch.getId().equals(branchId)) {
-                            branch.setName(newName);
+                            branch.getProducts().forEach(product -> {
+                                if (product.getId().equals(productId)) {
+                                    product.setStock(newStock);
+                                }
+                            });
                         }
                     });
                     return franchise;

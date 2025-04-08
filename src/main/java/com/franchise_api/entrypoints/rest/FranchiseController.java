@@ -1,10 +1,24 @@
 package com.franchise_api.entrypoints.rest;
 
-import com.franchise_api.application.usecase.*;
+import com.franchise_api.application.usecase.branch.AddBranchToFranchiseUseCase;
+import com.franchise_api.application.usecase.products.DeleteProductFromBranchUseCase;
+import com.franchise_api.application.usecase.branch.UpdateBranchNameUseCase;
+import com.franchise_api.application.usecase.products.GetProductWithMostStockUseCase;
+import com.franchise_api.application.usecase.products.UpdateProductNameUseCase;
+import com.franchise_api.application.usecase.franchises.DeleteFranchiseUseCase;
+import com.franchise_api.application.usecase.franchises.GetFranchiseByIdUseCase;
+import com.franchise_api.application.usecase.franchises.ListFranchisesUseCase;
+import com.franchise_api.application.usecase.franchises.SaveFranchiseUseCase;
+import com.franchise_api.application.usecase.products.UpdateProductStockUseCase;
 import com.franchise_api.application.util.FranchiseInputSanitizer;
 import com.franchise_api.domain.model.Franchise;
+import com.franchise_api.entrypoints.dto.BranchDTO;
 import com.franchise_api.entrypoints.dto.FranchiseDTO;
+import com.franchise_api.entrypoints.dto.ProductDTO;
+import com.franchise_api.entrypoints.dto.UpdateStockRequest;
+import com.franchise_api.entrypoints.dto.mappers.BranchDtoMapper;
 import com.franchise_api.entrypoints.dto.mappers.FranchiseDtoMapper;
+import com.franchise_api.entrypoints.dto.mappers.ProductDtoMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -21,26 +35,32 @@ public class FranchiseController {
     private final DeleteFranchiseUseCase deleteFranchiseUseCase;
     private final UpdateBranchNameUseCase updateBranchNameUseCase;
     private final UpdateProductNameUseCase updateProductNameUseCase;
-    private final FranchiseDtoMapper mapper;
+    private final AddBranchToFranchiseUseCase addBranchToFranchiseUseCase;
+    private final DeleteProductFromBranchUseCase deleteProductFromBranchUseCase;
+    private final UpdateProductStockUseCase updateProductStockUseCase;
+    private final GetProductWithMostStockUseCase getProductWithMostStockUseCase;
+    private final ProductDtoMapper productDtoMapper;
+    private final FranchiseDtoMapper franchiseDtoMapper;
+    private final BranchDtoMapper branchDtoMapper;
 
     @PostMapping
     public Mono<FranchiseDTO> create(@RequestBody FranchiseDTO dto) {
         FranchiseDTO sanitized = FranchiseInputSanitizer.sanitize(dto);
-        Franchise domain = mapper.toDomain(sanitized);
+        Franchise domain = franchiseDtoMapper.toDomain(sanitized);
         return saveFranchiseUseCase.execute(domain)
-                .map(mapper::toDto);
+                .map(franchiseDtoMapper::toDto);
     }
 
     @GetMapping("/{id}")
     public Mono<FranchiseDTO> getById(@PathVariable String id) {
         return getFranchiseByIdUseCase.execute(id)
-                .map(mapper::toDto);
+                .map(franchiseDtoMapper::toDto);
     }
 
     @GetMapping
     public Flux<FranchiseDTO> listAll() {
         return listFranchisesUseCase.execute(null)
-                .map(mapper::toDto);
+                .map(franchiseDtoMapper::toDto);
     }
 
     @DeleteMapping("/{id}")
@@ -51,12 +71,48 @@ public class FranchiseController {
     @PatchMapping("/branches/{branchId}/name")
     public Mono<FranchiseDTO> updateBranchName(@PathVariable String branchId, @RequestParam String name) {
         return updateBranchNameUseCase.execute(branchId, name)
-                .map(mapper::toDto);
+                .map(franchiseDtoMapper::toDto);
     }
 
     @PatchMapping("/products/{productId}/name")
     public Mono<FranchiseDTO> updateProductName(@PathVariable String productId, @RequestParam String name) {
         return updateProductNameUseCase.execute(productId, name)
-                .map(mapper::toDto);
+                .map(franchiseDtoMapper::toDto);
     }
+
+    @PatchMapping("/{franchiseId}/branches")
+    public Mono<FranchiseDTO> addBranch(@PathVariable String franchiseId,
+                                        @RequestBody BranchDTO newBranchDTO) {
+        return addBranchToFranchiseUseCase
+                .execute(franchiseId, branchDtoMapper.toDomain(newBranchDTO))
+                .map(franchiseDtoMapper::toDto);
+    }
+
+    @DeleteMapping("/{franchiseId}/branches/{branchId}/products/{productId}")
+    public Mono<FranchiseDTO> deleteProductFromBranch(@PathVariable String franchiseId,
+                                                      @PathVariable String branchId,
+                                                      @PathVariable String productId) {
+        return deleteProductFromBranchUseCase
+                .execute(franchiseId, branchId, productId)
+                .map(franchiseDtoMapper::toDto);
+    }
+
+    @PatchMapping("/{franchiseId}/branches/{branchId}/products/{productId}/stock")
+    public Mono<FranchiseDTO> updateProductStock(@PathVariable String franchiseId,
+                                                 @PathVariable String branchId,
+                                                 @PathVariable String productId,
+                                                 @RequestBody UpdateStockRequest request) {
+        return updateProductStockUseCase
+                .execute(franchiseId, branchId, productId, request.getStock())
+                .map(franchiseDtoMapper::toDto);
+    }
+
+    @GetMapping("/branches/{branchId}/products/most-stock")
+    public Mono<ProductDTO> getProductWithMostStock(@PathVariable String branchId) {
+        return getProductWithMostStockUseCase
+                .execute(branchId)
+                .map(productDtoMapper::toDto);
+    }
+
+
 }
