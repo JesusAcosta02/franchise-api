@@ -3,6 +3,7 @@ package com.franchise_api.application.usecase.branch;
 import com.franchise_api.domain.model.Branch;
 import com.franchise_api.domain.model.Franchise;
 import com.franchise_api.domain.repository.FranchiseRepository;
+import com.franchise_api.domain.usecase.branch.AddBranchToFranchiseUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;

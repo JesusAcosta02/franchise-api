@@ -2,7 +2,7 @@ package com.franchise_api.infrastructure.mongo.adapter;
 
 import com.franchise_api.domain.model.Franchise;
 import com.franchise_api.domain.repository.FranchiseRepository;
-import com.franchise_api.infrastructure.mapper.FranchiseEntityMapper;
+import com.franchise_api.infrastructure.entrypoints.mapper.FranchiseEntityMapper;
 import com.franchise_api.infrastructure.mongo.entity.FranchiseEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

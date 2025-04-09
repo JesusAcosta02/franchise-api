@@ -4,6 +4,7 @@ import com.franchise_api.domain.model.Branch;
 import com.franchise_api.domain.model.Franchise;
 import com.franchise_api.domain.model.Product;
 import com.franchise_api.domain.repository.FranchiseRepository;
+import com.franchise_api.domain.usecase.products.UpdateProductStockUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;

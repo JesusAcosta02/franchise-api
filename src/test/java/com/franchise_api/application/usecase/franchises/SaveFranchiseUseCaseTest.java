@@ -2,6 +2,7 @@ package com.franchise_api.application.usecase.franchises;
 
 import com.franchise_api.domain.model.Franchise;
 import com.franchise_api.domain.repository.FranchiseRepository;
+import com.franchise_api.domain.usecase.franchises.SaveFranchiseUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
