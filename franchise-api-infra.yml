@@ -7,10 +7,10 @@ Parameters:
     Default: vpc-04d1c0e284921a48d
   Subnet1:
     Type: String
-    Default: subnet-0cbc241eebf14312
+    Default: subnet-0bcbc241eebf14312
   Subnet2:
     Type: String
-    Default: subnet-0c68f5bb0878cd56
+    Default: subnet-0c68f5bb0878bcd56
   MongoUri:
     Type: String
     Description: MongoDB Atlas connection URI
