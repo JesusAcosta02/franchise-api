@@ -1,26 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Infrastructure for franchise-api using ECS Fargate, Load Balancer and API Gateway
+Description: Infrastructure for franchise-api with ECS Fargate, Load Balancer, and API Gateway
 
 Parameters:
   VpcId:
     Type: String
     Default: vpc-04d1c0e284921a48d
-
   Subnet1:
     Type: String
-    Default: subnet-0bcbc241eebf14312
-
+    Default: subnet-0cbc241eebf14312
   Subnet2:
     Type: String
-    Default: subnet-0c68f5bb0878bcd56
-
+    Default: subnet-0c68f5bb0878cd56
   MongoUri:
     Type: String
     Description: MongoDB Atlas connection URI
-
   ImageUrl:
     Type: String
-    Description: Docker image URL in ECR
+    Description: Docker image URL hosted in ECR
 
 Resources:
 
@@ -60,6 +56,10 @@ Resources:
       GroupDescription: Allow HTTP traffic
       VpcId: !Ref VpcId
       SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
           FromPort: 8080
           ToPort: 8080
@@ -108,6 +108,10 @@ Resources:
       VpcId: !Ref VpcId
       TargetType: ip
       HealthCheckPath: /actuator/health
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
 
   LoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -118,3 +122,8 @@ Resources:
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref FranchiseTargetGroup
+
+Outputs:
+  LoadBalancerDNS:
+    Description: Load balancer endpoint
+    Value: !GetAtt LoadBalancer.DNSName
